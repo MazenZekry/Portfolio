@@ -1,7 +1,7 @@
 /*
  * Intro loader: "Hey!" with two orbiting circles in the middle of the screen.
- * When loading is done, both circles grow together and sink into black
- * until they cover the screen, then the black fades and the page settles in.
+ * When loading is done, both circles grow together and sink into the page's
+ * dark background; near the end the loader fades and the page settles in.
  * Colors follow the site's blue palette.
  */
 export function Loader({
@@ -54,9 +54,11 @@ export function Loader({
     ctx.fill();
   };
 
-  // mix a hex color toward black: k = 0 keeps it, k = 1 is black
+  // mix a hex color toward the page background: k = 0 keeps it, k = 1 is the background
   const toRgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
-  const darken = (hex, k) => `rgb(${toRgb(hex).map(v => Math.round(v * (1 - k))).join(',')})`;
+  const bgRgb = toRgb(background);
+  const darken = (hex, k) => `rgb(${toRgb(hex).map((v, i) => Math.round(v + (bgRgb[i] - v) * k)).join(',')})`;
+  let revealing = false;
   // strong ease-in-out for on-screen movement
   const easeInOutStrong = t => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
 
@@ -93,8 +95,8 @@ export function Loader({
     ctx.globalAlpha = gt > 0 ? 1 : clamp01(t / 250);
     for (const c of order) {
       const radius = r * pop + (reach(c) - r) * k;
-      // the circles sink into black as they grow
-      circle(c.x, c.y, radius, darken(c.color, Math.min(1, k * 1.15)));
+      // the circles sink into the page's dark background as they grow
+      circle(c.x, c.y, radius, darken(c.color, Math.min(1, k * 1.25)));
     }
     ctx.globalAlpha = 1;
 
@@ -109,23 +111,31 @@ export function Loader({
       ctx.globalAlpha = 1;
     }
 
+    // Overlap: start showing the page while the circles finish covering the screen,
+    // so there is never a moment stuck on a dark screen.
+    if (!revealing && gt >= revealMs * 0.72) reveal();
     if (gt >= revealMs) {
-      finish();
+      done = true;
       return;
     }
     requestAnimationFrame(frame);
   };
 
-  // The screen is fully black now: fade the black away and let the page settle in.
-  const finish = () => {
-    done = true;
+  // Fade the loader away; the page is already drawn underneath, so it shows instantly.
+  const reveal = () => {
+    revealing = true;
     window.removeEventListener('resize', resize);
     canvas.classList.add('is-leaving');
     root.classList.remove('is-loading', 'loader-active');
     let removed = false;
-    const remove = () => { if (!removed) { removed = true; canvas.remove(); } };
+    const remove = () => {
+      if (removed) return;
+      removed = true;
+      done = true;
+      canvas.remove();
+    };
     canvas.addEventListener('transitionend', remove, { once: true });
-    setTimeout(remove, 900);
+    setTimeout(remove, 800);
   };
 
   requestAnimationFrame(frame);

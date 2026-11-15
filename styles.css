@@ -314,12 +314,13 @@ html.is-loading body::after { /* covers the page until the loader canvas takes o
 html.is-loading, html.loader-active { overflow: hidden; }
 .site-loader {
   position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 10000; pointer-events: none;
-  transition: opacity 600ms cubic-bezier(0.23, 1, 0.32, 1);
+  transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .site-loader.is-leaving { opacity: 0; }
-/* the page waits slightly scaled down and settles in as the black fades */
-main { transition: opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), transform 900ms cubic-bezier(0.23, 1, 0.32, 1); }
-html.is-loading main, html.loader-active main { opacity: 0; transform: scale(0.97); }
+/* the page is drawn underneath the whole time (so it is ready), slightly scaled down,
+   and settles in as the loader fades */
+main { transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1); }
+html.is-loading main, html.loader-active main { transform: scale(0.97); }
 @media (prefers-reduced-motion: reduce) {
   html.is-loading body::after { display: none; }
 }
