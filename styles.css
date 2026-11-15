@@ -317,10 +317,6 @@ html.is-loading, html.loader-active { overflow: hidden; }
   transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 .site-loader.is-leaving { opacity: 0; }
-/* the page is drawn underneath the whole time (so it is ready), slightly scaled down,
-   and settles in as the loader fades */
-main { transition: transform 700ms cubic-bezier(0.23, 1, 0.32, 1); }
-html.is-loading main, html.loader-active main { transform: scale(0.97); }
 @media (prefers-reduced-motion: reduce) {
   html.is-loading body::after { display: none; }
 }
