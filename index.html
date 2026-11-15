@@ -17,15 +17,14 @@
 <body>
   <div class="grid-bg" aria-hidden="true"></div>
 
-  <header class="nav">
-    <a href="#top" class="logo"><span class="mono">&lt;</span>MZ<span class="mono">/&gt;</span></a>
-    <nav>
-      <a href="#work">Work</a>
-      <a href="#process">Process</a>
-      <a href="#about">About</a>
-      <a href="#contact" class="btn btn-sm">Let's talk</a>
-    </nav>
-  </header>
+  <nav class="side-nav" aria-label="Sections">
+      <a href="#top" class="side-link" data-section="top" aria-label="Home"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v11h14V9"/><path d="M10 20v-6h4v6"/></svg><span class="side-tip">Home</span></a>
+      <a href="#work" class="side-link" data-section="work" aria-label="Work"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg><span class="side-tip">Work</span></a>
+      <a href="#services" class="side-link" data-section="services" aria-label="Services"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg><span class="side-tip">Services</span></a>
+      <a href="#process" class="side-link" data-section="process" aria-label="Process"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span class="side-tip">Process</span></a>
+      <a href="#about" class="side-link" data-section="about" aria-label="About"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span class="side-tip">About</span></a>
+      <a href="#contact" class="side-link" data-section="contact" aria-label="Contact"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="side-tip">Contact</span></a>
+  </nav>
 
   <main id="top">
     <!-- HERO -->
@@ -91,7 +90,7 @@
     </section>
 
     <!-- SERVICES -->
-    <section class="section">
+    <section id="services" class="section">
       <h2 class="section-title"><span class="mono">02.</span> What I Do</h2>
       <div class="services">
         <div class="service reveal"><span class="icon mono">[ux]</span><h3>UX Research</h3><p>Interviews, usability testing and competitive analysis to find what users actually need.</p></div>
@@ -150,6 +149,30 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    // Highlight the sidebar button for the section on screen
+    (function () {
+      const links = [...document.querySelectorAll('.side-link')];
+      const byId = Object.fromEntries(links.map(l => [l.dataset.section, l]));
+      const setActive = id => links.forEach(l => {
+        const on = l.dataset.section === id;
+        l.classList.toggle('is-active', on);
+        if (on) l.setAttribute('aria-current', 'true'); else l.removeAttribute('aria-current');
+      });
+      const sections = links.map(l => document.getElementById(l.dataset.section)).filter(Boolean);
+      const pick = () => {
+        const mid = window.innerHeight * 0.4;
+        let current = sections[0];
+        for (const s of sections) if (s.getBoundingClientRect().top <= mid) current = s;
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) current = sections[sections.length - 1];
+        setActive(current.id);
+      };
+      let ticking = false;
+      window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; pick(); }); } }, { passive: true });
+      window.addEventListener('resize', pick);
+      pick();
+    })();
+  </script>
   <script type="module">
     import { Loader } from './components/Loader.js';
     import { GradientASCII } from './components/GradientASCII.js';
