@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="is-loading">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="components/GradientASCII.css">
   <link rel="stylesheet" href="components/GlowCursor.css">
   <link rel="stylesheet" href="styles.css">
+  <noscript><style>html.is-loading body::after { display: none; } html.is-loading { overflow: auto; }</style></noscript>
+  <script>setTimeout(function () { document.documentElement.classList.remove('is-loading'); }, 5000);</script>
 </head>
 <body>
   <div class="grid-bg" aria-hidden="true"></div>
@@ -149,8 +151,11 @@
 
   <script src="script.js"></script>
   <script type="module">
+    import { Loader } from './components/Loader.js';
     import { GradientASCII } from './components/GradientASCII.js';
     import { GlowCursor } from './components/GlowCursor.js';
+    Loader();
+
     GradientASCII(document.getElementById('hero-ascii'), {
       colors: ['#1e3fd8', '#f6f8ff', '#a5d8ff', '#38bdf8'],
       shape: 'horizon',

@@ -249,3 +249,13 @@ main { padding: 0 16px; }
   .avatar-frame { --size: 150px; border-radius: 32px; }
   .badge { margin-top: 48px; font-size: .85rem; border-radius: 18px; padding: 8px 12px; }
 }
+
+/* LOADER */
+html.is-loading body::after { /* covers the page until the loader canvas takes over */
+  content: ""; position: fixed; inset: 0; z-index: 9999; background: #020714;
+}
+html.is-loading, html.loader-active { overflow: hidden; }
+.site-loader { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 10000; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  html.is-loading body::after { display: none; }
+}
