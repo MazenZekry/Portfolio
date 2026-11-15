@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="components/GradientASCII.css">
+  <link rel="stylesheet" href="components/GlowCursor.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -28,8 +29,15 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-bg" aria-hidden="true">
+        <video class="hero-video" autoplay muted loop playsinline poster="video/hero-poster.jpg">
+          <source src="video/hero-smoke.mp4" type="video/mp4">
+        </video>
+        <video class="hero-video hero-video--lit" autoplay muted loop playsinline>
+          <source src="video/hero-smoke.mp4" type="video/mp4">
+        </video>
         <div id="hero-ascii" class="hero-ascii"></div>
         <div class="hero-fade"></div>
+        <div id="hero-glow" class="hero-glow"></div>
       </div>
 
       <div class="hero-content">
@@ -142,6 +150,7 @@
   <script src="script.js"></script>
   <script type="module">
     import { GradientASCII } from './components/GradientASCII.js';
+    import { GlowCursor } from './components/GlowCursor.js';
     GradientASCII(document.getElementById('hero-ascii'), {
       colors: ['#1e3fd8', '#f6f8ff', '#a5d8ff', '#38bdf8'],
       shape: 'horizon',
@@ -149,6 +158,38 @@
       cellSize: 18,
       density: 0.8
     });
+
+    GlowCursor(document.getElementById('hero-glow'), {
+      color: '#5f8bff',
+      intensity: 1.3,
+      trailWidth: 3,
+      linger: 1.4,
+      glow: 1.2,
+      clickBurst: true,
+      theme: 'dark'
+    });
+
+    // Light up the smoke video around the cursor so the glow feels like it hits the smoke
+    const hero = document.querySelector('.hero');
+    const lit = { x: 0, y: 0, tx: 0, ty: 0, on: 0, ton: 0, raf: 0 };
+    const tick = () => {
+      lit.x += (lit.tx - lit.x) * 0.15;
+      lit.y += (lit.ty - lit.y) * 0.15;
+      lit.on += (lit.ton - lit.on) * 0.08;
+      hero.style.setProperty('--mx', lit.x + 'px');
+      hero.style.setProperty('--my', lit.y + 'px');
+      hero.style.setProperty('--lit', lit.on.toFixed(3));
+      const moving = Math.abs(lit.tx - lit.x) + Math.abs(lit.ty - lit.y) + Math.abs(lit.ton - lit.on) > 0.5 / 100;
+      lit.raf = moving ? requestAnimationFrame(tick) : 0;
+    };
+    const kick = () => { if (!lit.raf) lit.raf = requestAnimationFrame(tick); };
+    hero.addEventListener('pointermove', e => {
+      const r = hero.getBoundingClientRect();
+      lit.tx = e.clientX - r.left; lit.ty = e.clientY - r.top;
+      if (!lit.ton) { lit.x = lit.tx; lit.y = lit.ty; }
+      lit.ton = 1; kick();
+    });
+    hero.addEventListener('pointerleave', () => { lit.ton = 0; kick(); });
   </script>
 </body>
 </html>
