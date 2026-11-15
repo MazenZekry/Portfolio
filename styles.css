@@ -49,7 +49,7 @@ ul, ol { list-style: none; }
   border-radius: 999px;
   isolation: isolate;
   /* Figma "Glass": fill at 20% of an 8%→3% white gradient, 15% stroke, no drop shadow */
-  background: linear-gradient(180deg, rgba(255, 255, 255, .016), rgba(255, 255, 255, .006));
+background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
   border: 1px solid rgba(255, 255, 255, .15);
   /* depth: soft inner light, brighter from the top-left (light angle -45deg) */
   box-shadow:
