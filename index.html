@@ -10,7 +10,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="components/GradientASCII.css">
   <link rel="stylesheet" href="components/GlowCursor.css">
-  <link rel="stylesheet" href="components/LightRays.css">
   <link rel="stylesheet" href="styles.css">
   <noscript><style>html.is-loading body::after { display: none; } html.is-loading { overflow: auto; }</style></noscript>
   <script>setTimeout(function () { document.documentElement.classList.remove('is-loading'); }, 5000);</script>
@@ -46,7 +45,6 @@
         </video>
         <div id="hero-ascii" class="hero-ascii"></div>
         <div class="hero-fade"></div>
-        <div id="hero-rays" class="hero-rays"></div>
         <div id="hero-glow" class="hero-glow"></div>
       </div>
 
@@ -186,7 +184,6 @@
     import { Loader } from './components/Loader.js';
     import { GradientASCII } from './components/GradientASCII.js';
     import { GlowCursor } from './components/GlowCursor.js';
-    import { LightRays } from './components/LightRays.js';
     Loader();
 
     GradientASCII(document.getElementById('hero-ascii'), {
@@ -195,19 +192,6 @@
       characters: ' =+xX0S8#@',
       cellSize: 18,
       density: 0.8
-    });
-
-    // light coming down from the top of the screen
-    LightRays(document.getElementById('hero-rays'), {
-      raysOrigin: 'top-center',
-      raysColor: '#ffffff',
-      raysSpeed: 1,
-      lightSpread: 0.5,
-      rayLength: 3,
-      glow: 0.6,
-      haze: 0.25,
-      followMouse: true,
-      mouseInfluence: 0.1
     });
 
     GlowCursor(document.getElementById('hero-glow'), {
