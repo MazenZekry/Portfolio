@@ -1,7 +1,7 @@
 /*
  * Intro loader: "Hey!" with two orbiting circles in the middle of the screen.
- * When loading is done, both circles grow together like masks,
- * showing the page inside them until they fill the screen.
+ * When loading is done, both circles grow together and sink into black
+ * until they cover the screen, then the black fades and the page settles in.
  * Colors follow the site's blue palette.
  */
 export function Loader({
@@ -11,7 +11,7 @@ export function Loader({
   circleB = '#e6efff', // pale blue-white
   holdMs = 1500, // circles orbiting with the text
   mergeMs = 300, // the text fades out before the reveal
-  revealMs = 1300 // the circle grows and reveals the page inside it
+  revealMs = 950 // both circles grow, darkening to black, until they cover the screen
 } = {}) {
   const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
   const root = document.documentElement;
@@ -54,6 +54,12 @@ export function Loader({
     ctx.fill();
   };
 
+  // mix a hex color toward black: k = 0 keeps it, k = 1 is black
+  const toRgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+  const darken = (hex, k) => `rgb(${toRgb(hex).map(v => Math.round(v * (1 - k))).join(',')})`;
+  // strong ease-in-out for on-screen movement
+  const easeInOutStrong = t => (t < 0.5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2);
+
   const frame = now => {
     if (done) return;
     if (first) {
@@ -67,72 +73,59 @@ export function Loader({
     const cy = h / 2;
     const r = Math.max(40, Math.min(w, h) * 0.07);
     const mt = t - holdMs; // time into the text fade-out
-    const rt = mt - mergeMs; // time into the reveal
+    const gt = mt - mergeMs; // time into the grow
 
-    // circle positions: orbiting, then frozen where they are when the reveal starts
+    // circle positions: orbiting, then frozen where they are when the grow starts
     const angle = (Math.min(t, holdMs + mergeMs) / 1000) * Math.PI * 1.15;
     const d = r * 0.62;
     const A = { x: cx + Math.cos(angle) * d, y: cy + Math.sin(angle) * d, color: circleA };
     const B = { x: cx - Math.cos(angle) * d, y: cy - Math.sin(angle) * d, color: circleB };
     const order = Math.sin(angle) > 0 ? [A, B] : [B, A]; // back to front
+    const reach = c => Math.max(Math.hypot(c.x, c.y), Math.hypot(w - c.x, c.y), Math.hypot(c.x, h - c.y), Math.hypot(w - c.x, h - c.y)) + 4;
 
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
     ctx.clearRect(0, 0, w, h);
+    ctx.globalAlpha = 1;
     ctx.fillStyle = background;
     ctx.fillRect(0, 0, w, h);
 
-    if (rt < 0) {
-      // Orbit with the text; the text fades out just before the reveal.
-      const pop = easeOut(clamp01(t / 450));
-      for (const c of order) circle(c.x, c.y, r * pop, c.color);
-      const textFade = clamp01((t - 150) / 350) * (1 - clamp01(mt / mergeMs));
-      if (textFade > 0) {
-        ctx.globalAlpha = textFade;
-        ctx.fillStyle = '#f6f8ff';
-        ctx.font = `600 ${Math.round(r * 0.6)}px ${fontFamily}`;
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(text, cx - r * 0.75, cy);
-        ctx.globalAlpha = 1;
-      }
-    } else {
-      // Reveal: both circles become windows onto the page and grow together.
-      const k = easeInOut(clamp01(rt / revealMs));
-      const reach = c => Math.max(Math.hypot(c.x, c.y), Math.hypot(w - c.x, c.y), Math.hypot(c.x, h - c.y), Math.hypot(w - c.x, h - c.y)) + 4;
-      const holes = order.map(c => ({ ...c, radius: r + (reach(c) - r) * k }));
-      ctx.globalCompositeOperation = 'destination-out';
-      for (const c of holes) circle(c.x, c.y, c.radius, '#000');
-      ctx.globalCompositeOperation = 'source-over';
-      // glowing rims in each circle's own color, fading as they grow
-      const rim = 1 - k;
-      if (rim > 0.01) {
-        ctx.globalAlpha = rim;
-        ctx.lineWidth = 2;
-        ctx.shadowBlur = 24;
-        for (const c of holes) {
-          ctx.strokeStyle = c.color;
-          ctx.shadowColor = circleA;
-          ctx.beginPath();
-          ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-      }
-      if (rt >= revealMs) {
-        finish();
-        return;
-      }
+    const pop = 0.6 + 0.4 * easeOut(clamp01(t / 450)); // never grow from nothing
+    const k = gt > 0 ? easeInOutStrong(clamp01(gt / revealMs)) : 0;
+    ctx.globalAlpha = gt > 0 ? 1 : clamp01(t / 250);
+    for (const c of order) {
+      const radius = r * pop + (reach(c) - r) * k;
+      // the circles sink into black as they grow
+      circle(c.x, c.y, radius, darken(c.color, Math.min(1, k * 1.15)));
+    }
+    ctx.globalAlpha = 1;
+
+    const textFade = clamp01((t - 150) / 350) * (1 - clamp01(mt / mergeMs));
+    if (textFade > 0) {
+      ctx.globalAlpha = textFade;
+      ctx.fillStyle = '#f6f8ff';
+      ctx.font = `600 ${Math.round(r * 0.6)}px ${fontFamily}`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, cx - r * 0.75, cy);
+      ctx.globalAlpha = 1;
+    }
+
+    if (gt >= revealMs) {
+      finish();
+      return;
     }
     requestAnimationFrame(frame);
   };
 
+  // The screen is fully black now: fade the black away and let the page settle in.
   const finish = () => {
     done = true;
     window.removeEventListener('resize', resize);
-    canvas.remove();
+    canvas.classList.add('is-leaving');
     root.classList.remove('is-loading', 'loader-active');
+    let removed = false;
+    const remove = () => { if (!removed) { removed = true; canvas.remove(); } };
+    canvas.addEventListener('transitionend', remove, { once: true });
+    setTimeout(remove, 900);
   };
 
   requestAnimationFrame(frame);
