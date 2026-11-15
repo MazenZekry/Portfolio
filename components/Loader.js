@@ -77,16 +77,16 @@ export function Loader({
     const mt = t - holdMs; // time into the text fade-out
     const gt = mt - mergeMs; // time into the grow
 
-    // 3D orbit: the circles go around each other on a tilted ring.
-    // z is depth (+1 = closest). They swap front/back only when z = 0, which is
-    // when they sit side by side without overlapping, so the swap is never seen.
+    // Plain circular orbit. They overlap, so instead of swapping which one is on top
+    // in a single frame, the circle coming to the front fades in over the other one.
     const angle = (Math.min(t, holdMs + mergeMs) / 1000) * Math.PI * 1.15;
-    const D = r * 1.08; // half the distance between them at the sides (> r, so no overlap)
-    const z = Math.sin(angle);
-    const depth = 0.1; // how much closer/farther changes the size
-    const A = { x: cx + Math.cos(angle) * D, y: cy + z * D * 0.32, s: 1 + z * depth, color: circleA };
-    const B = { x: cx - Math.cos(angle) * D, y: cy - z * D * 0.32, s: 1 - z * depth, color: circleB };
-    const order = A.s < B.s ? [A, B] : [B, A]; // farther first, closer on top
+    const D = r * 0.62;
+    const z = Math.sin(angle); // > 0: blue in front, < 0: pale in front
+    const A = { x: cx + Math.cos(angle) * D, y: cy + Math.sin(angle) * D, color: circleA };
+    const B = { x: cx - Math.cos(angle) * D, y: cy - Math.sin(angle) * D, color: circleB };
+    const sstep = (e0, e1, x) => { const u = clamp01((x - e0) / (e1 - e0)); return u * u * (3 - 2 * u); };
+    const paleOnTop = sstep(0.35, -0.35, z); // 0 = blue on top, 1 = pale on top, eased in between
+    const order = [B, A]; // pale drawn first, blue on top; pale is re-drawn over it with paleOnTop
     const reach = c => Math.max(Math.hypot(c.x, c.y), Math.hypot(w - c.x, c.y), Math.hypot(c.x, h - c.y), Math.hypot(w - c.x, h - c.y)) + 4;
 
     ctx.clearRect(0, 0, w, h);
@@ -97,10 +97,14 @@ export function Loader({
     const pop = 0.6 + 0.4 * easeOut(clamp01(t / 450)); // never grow from nothing
     const k = gt > 0 ? easeInOutStrong(clamp01(gt / revealMs)) : 0;
     ctx.globalAlpha = gt > 0 ? 1 : clamp01(t / 250);
-    for (const c of order) {
-      const radius = r * pop * c.s + (reach(c) - r * c.s) * k;
-      // the circles sink into the page's dark background as they grow
-      circle(c.x, c.y, radius, darken(c.color, Math.min(1, k * 1.25)));
+    const dark = Math.min(1, k * 1.25); // the circles sink into the page's dark background as they grow
+    const radiusOf = c => r * pop + (reach(c) - r) * k;
+    for (const c of order) circle(c.x, c.y, radiusOf(c), darken(c.color, dark));
+    if (paleOnTop > 0) {
+      const base = ctx.globalAlpha;
+      ctx.globalAlpha = base * paleOnTop;
+      circle(B.x, B.y, radiusOf(B), darken(B.color, dark));
+      ctx.globalAlpha = base;
     }
     ctx.globalAlpha = 1;
 
@@ -111,7 +115,7 @@ export function Loader({
       ctx.font = `600 ${Math.round(r * 0.6)}px ${fontFamily}`;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
-      ctx.fillText(text, cx - D - r * 1.25, cy);
+      ctx.fillText(text, cx - r * 0.75, cy);
       ctx.globalAlpha = 1;
     }
 
