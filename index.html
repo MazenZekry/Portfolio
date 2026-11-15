@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="components/GradientASCII.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -27,12 +28,8 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-bg" aria-hidden="true">
-        <video class="hero-video" autoplay muted loop playsinline poster="video/hero-poster.jpg">
-          <source src="video/hero-smoke.mp4" type="video/mp4">
-        </video>
-        <div class="hero-tint"></div>
-        <div class="hero-grid"></div>
-        <div class="hero-horizon"></div>
+        <div id="hero-ascii" class="hero-ascii"></div>
+        <div class="hero-fade"></div>
       </div>
 
       <div class="hero-content">
@@ -143,5 +140,15 @@
   </footer>
 
   <script src="script.js"></script>
+  <script type="module">
+    import { GradientASCII } from './components/GradientASCII.js';
+    GradientASCII(document.getElementById('hero-ascii'), {
+      colors: ['#1e3fd8', '#f6f8ff', '#a5d8ff', '#38bdf8'],
+      shape: 'horizon',
+      characters: ' =+xX0S8#@',
+      cellSize: 18,
+      density: 0.8
+    });
+  </script>
 </body>
 </html>
