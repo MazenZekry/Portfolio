@@ -74,7 +74,8 @@ background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255,
     rgba(255, 255, 255, .04) 60%, rgba(160, 200, 255, .3) 82%, rgba(255, 190, 240, .35) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
 }
 .side-link {
   position: relative;
