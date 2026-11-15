@@ -70,8 +70,11 @@ background: linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255,
     rgba(255, 255, 255, .4) 0%, rgba(255, 255, 255, .14) 20%, rgba(255, 255, 255, .06) 45%,
     rgba(255, 255, 255, .06) 60%, rgba(170, 200, 255, .14) 82%, rgba(220, 200, 255, .2) 100%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+
   -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+
 }
 .side-link {
   position: relative;
