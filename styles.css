@@ -201,6 +201,54 @@ main { padding: 0 16px; }
   background: rgba(40, 52, 75, .55); border: 1px solid rgba(120, 140, 180, .25);
   color: #c9d3e3; font-size: .95rem; font-weight: 500;
   backdrop-filter: blur(8px);
+  position: relative;
+}
+
+/* BORDER BEAM
+   size 45 · duration 6s · delay 0 · reverse false · initialOffset 0 · borderThickness 2
+   opacity 1 · glowIntensity 8 · beamBorderRadius 45 · pauseOnHover false · speedMultiplier 1 */
+.border-beam {
+  --beam-size: 45px;
+  --beam-duration: 6s;
+  --beam-delay: 0s;
+  --beam-offset: 0%;
+  --beam-thickness: 2px;
+  --beam-radius: 45px;
+  --beam-glow: 8px;
+  --beam-speed: 1;
+  position: absolute; inset: -1px; /* sits on top of the badge's own 1px border */
+  border-radius: inherit;
+  border: var(--beam-thickness) solid transparent;
+  pointer-events: none;
+  opacity: 1;
+  /* only the border ring is visible */
+  -webkit-mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0) border-box;
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) padding-box, linear-gradient(#000 0 0) border-box;
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 var(--beam-glow) rgba(95, 139, 255, .9));
+}
+.border-beam::after {
+  content: "";
+  position: absolute;
+  width: var(--beam-size); aspect-ratio: 1;
+  /* tail fades out, head is the brightest: deep blue -> glow blue -> light sky */
+  background: linear-gradient(to left, #9ed6f8, #5f8bff 40%, #1e3fd8 75%, transparent);
+  offset-path: rect(0 auto auto 0 round var(--beam-radius));
+  offset-anchor: 90% 50%;
+  offset-distance: var(--beam-offset);
+  animation: border-beam calc(var(--beam-duration) / var(--beam-speed)) linear var(--beam-delay) infinite;
+}
+@keyframes border-beam {
+  from { offset-distance: var(--beam-offset); }
+  to { offset-distance: calc(var(--beam-offset) + 100%); }
+}
+/* browsers without offset-path rect(): keep the badge as it was */
+@supports not (offset-path: rect(0 auto auto 0)) {
+  .border-beam { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .border-beam::after { animation: none; offset-distance: 25%; }
 }
 .badge-chip {
   padding: 4px 10px; border-radius: 999px; font-weight: 700; color: #fff;
