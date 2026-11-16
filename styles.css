@@ -131,8 +131,9 @@ main { padding: 0 16px; }
 .hero {
   --horizon: 200px;
   position: relative; isolation: isolate; overflow: hidden;
-  margin: 0 -16px; padding: 0 16px 120px;
-  min-height: 100vh;
+  margin: 0 -16px; padding: 48px 16px 72px; /* a bit more at the bottom so the block sits slightly above center */
+  min-height: 100vh; min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
   background: #020714;
   text-align: center;
 }
@@ -185,7 +186,6 @@ main { padding: 0 16px; }
 .avatar-frame {
   --size: 192px;
   width: var(--size); height: var(--size);
-  margin-top: calc(var(--horizon) - var(--size) / 2);
   border-radius: 40px; overflow: hidden; position: relative;
   background: radial-gradient(circle at 50% 40%, #1747c4 0%, #0b2a86 45%, #061650 100%);
   border: 3px solid rgba(70, 110, 210, .55);
@@ -302,7 +302,7 @@ main { padding: 0 16px; }
   .avatar { max-width: 260px; }
   .section { padding: 72px 0; }
   .cards { grid-template-columns: 1fr; }
-  .hero { --horizon: 150px; padding-bottom: 80px; }
+  .hero { padding: 40px 16px 104px; } /* leave room for the bottom nav bar */
   .avatar-frame { --size: 150px; border-radius: 32px; }
   .badge { margin-top: 48px; font-size: .85rem; border-radius: 18px; padding: 8px 12px; }
 }
